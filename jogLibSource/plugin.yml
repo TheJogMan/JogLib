@@ -1,5 +1,5 @@
 name: JogLib
-main: joglib.JogLib
+main: jogLib.JogLib
 author: TheJogMan
 load: STARTUP
 version: 3.0
