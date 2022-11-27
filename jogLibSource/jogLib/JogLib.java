@@ -1,12 +1,10 @@
 package jogLib;
 
-import jogLib.command.*;
+import jogLib.customContent.*;
+import jogLib.values.*;
 import jogUtil.*;
-import jogUtil.data.values.*;
+import jogUtil.data.*;
 import org.bukkit.*;
-import org.bukkit.event.*;
-import org.bukkit.event.player.*;
-import org.bukkit.event.server.*;
 import org.bukkit.plugin.java.*;
 
 public class JogLib extends JavaPlugin
@@ -19,49 +17,41 @@ public class JogLib extends JavaPlugin
 		jogLib = this;
 	}
 	
+	public static JogLib jogLib()
+	{
+		return jogLib;
+	}
+	
 	@Override
 	public void onEnable()
 	{
-		jogUtil.data.TypeRegistry.defaultValueStatus();
+		registerValues();
 		
-		Bukkit.getPluginManager().registerEvents(new CommandEventListener(commandConsole), this);
+		Bukkit.getPluginManager().registerEvents(new PluginConsole.CommandEventListener(commandConsole), this);
+		
+		ContentManager.init(this);
 	}
 	
-	public static ReturnResult<Boolean> executeCommand(String command, PluginExecutor executor)
+	private static ReturnResult<Result[]> registerValues()
 	{
-		if (executor == null)
-			return new ReturnResult<>("Must provide an executor");
+		Object[][] typeClasses = {
+				{"NamespacedKey", NamespacedKeyValue.class},
+				{"Location", LocationValue.class},
+				{"Material", MaterialValue.class},
+				{"BlockData", BlockDataValue.class}
+		};
 		
-		if (command == null || command.length() == 0)
-			return new ReturnResult<>("Command string empty or null");
-		
-		if (command.charAt(0) == commandConsole.prefix)
-			command = command.substring(1);
-		
-		return commandConsole.interpret(StringValue.indexer(command), executor);
-	}
-	
-	private static class CommandEventListener implements Listener
-	{
-		PluginConsole console;
-		
-		CommandEventListener(PluginConsole console)
+		Result[] registrationResults = new Result[typeClasses.length];
+		for (int index = 0; index < typeClasses.length; index++)
 		{
-			this.console = console;
+			Class<? extends Value<?, ?>> typeClass = (Class<? extends Value<?, ?>>)typeClasses[index][1];
+			String name = (String)typeClasses[index][0];
+			Result result = TypeRegistry.register(name, typeClass);
+			if (!result.success())
+				throw new RuntimeException("Could not register value: " + result.description());
+			registrationResults[index] = result;
 		}
 		
-		@EventHandler(priority = EventPriority.MONITOR)
-		public void onServerCommand(ServerCommandEvent event)
-		{
-			executeCommand(event.getCommand(), new PluginExecutor(event.getSender()));
-			event.setCancelled(true);
-		}
-		
-		@EventHandler(priority = EventPriority.MONITOR)
-		public void onPlayerCommandPreprocess(PlayerCommandPreprocessEvent event)
-		{
-			executeCommand(event.getMessage(), new PluginExecutor(event.getPlayer()));
-			event.setCancelled(true);
-		}
+		return new ReturnResult<>(registrationResults);
 	}
 }

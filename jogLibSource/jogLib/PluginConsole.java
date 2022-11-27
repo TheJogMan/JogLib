@@ -1,7 +1,8 @@
 package jogLib;
 
-import jogLib.command.*;
-import jogUtil.Result;
+import jogLib.command.executor.*;
+import jogLib.command.filter.*;
+import jogUtil.*;
 import jogUtil.commander.*;
 import jogUtil.commander.argument.*;
 import jogUtil.commander.argument.arguments.*;
@@ -11,6 +12,9 @@ import jogUtil.data.values.StringValue;
 import jogUtil.richText.*;
 import org.bukkit.*;
 import org.bukkit.command.*;
+import org.bukkit.event.*;
+import org.bukkit.event.player.*;
+import org.bukkit.event.server.*;
 import org.bukkit.plugin.*;
 
 import java.lang.reflect.*;
@@ -78,13 +82,13 @@ public class PluginConsole extends Console
 		@Override
 		public boolean execute(CommandSender commandSender, String commandLabel, String[] arguments)
 		{
-			return component.interpret(StringValue.indexer(rebuild(arguments)), new PluginExecutor(commandSender)).success();
+			return component.interpret(StringValue.indexer(rebuild(arguments)), PluginExecutor.convert(commandSender)).success();
 		}
 		
 		@Override
 		public List<String> tabComplete(CommandSender sender, String alias, String[] args)
 		{
-			return component.getCompletions(StringValue.indexer(rebuild(args)), new PluginExecutor(sender));
+			return component.getCompletions(StringValue.indexer(rebuild(args)), PluginExecutor.convert(sender));
 		}
 		
 		static String rebuild(String[] arguments)
@@ -215,6 +219,44 @@ public class PluginConsole extends Console
 			else
 				arguments = new String[0];
 			command.execute(((PluginExecutor)executor).sender(), command.getLabel(), arguments);
+		}
+	}
+	
+	public static ReturnResult<Boolean> executeCommand(String command, PluginExecutor executor)
+	{
+		if (executor == null)
+			return new ReturnResult<>("Must provide an executor");
+		
+		if (command == null || command.length() == 0)
+			return new ReturnResult<>("Command string empty or null");
+		
+		if (command.charAt(0) == JogLib.commandConsole.prefix)
+			command = command.substring(1);
+		
+		return JogLib.commandConsole.interpret(StringValue.indexer(command), executor);
+	}
+	
+	static class CommandEventListener implements Listener
+	{
+		PluginConsole console;
+		
+		CommandEventListener(PluginConsole console)
+		{
+			this.console = console;
+		}
+		
+		@EventHandler(priority = EventPriority.MONITOR)
+		public void onServerCommand(ServerCommandEvent event)
+		{
+			executeCommand(event.getCommand(), PluginExecutor.convert(event.getSender()));
+			event.setCancelled(true);
+		}
+		
+		@EventHandler(priority = EventPriority.MONITOR)
+		public void onPlayerCommandPreprocess(PlayerCommandPreprocessEvent event)
+		{
+			executeCommand(event.getMessage(), PluginExecutor.convert(event.getPlayer()));
+			event.setCancelled(true);
 		}
 	}
 }
