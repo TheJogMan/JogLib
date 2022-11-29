@@ -38,7 +38,7 @@ public class MaterialValue extends Value<Material, Material>
 	@Override
 	public byte[] asBytes()
 	{
-		return StringValue.toByteData(get().toString());
+		return StringValue.toByteData(convertOut(get().toString()));
 	}
 	
 	@Override

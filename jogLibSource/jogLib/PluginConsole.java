@@ -5,10 +5,10 @@ import jogLib.command.filter.*;
 import jogUtil.*;
 import jogUtil.commander.*;
 import jogUtil.commander.argument.*;
-import jogUtil.commander.argument.arguments.*;
 import jogUtil.commander.command.*;
 import jogUtil.commander.command.Command;
 import jogUtil.data.values.StringValue;
+import jogUtil.indexable.*;
 import jogUtil.richText.*;
 import org.bukkit.*;
 import org.bukkit.command.*;
@@ -134,20 +134,21 @@ public class PluginConsole extends Console
 		public VanillaCommand(org.bukkit.command.Command command)
 		{
 			super(command.getName(), getDescriptionFromUsage(command.getDescription(), command.getUsage()));
+			command.getAliases().forEach(this::addAlias);
 			this.command = command;
 			if (command instanceof PluginCommand)
 			{
 				String usage = parseUsage(command.getUsage())[0];
 				if (usage.length() > 0)
 				{
-					addArgument(WordArgument.class, usage, new Object[] {false});
+					addArgument(VanillaArgumentsArgument.class, usage, new Object[] {false});
 					if (usage.charAt(0) != '<')
 						addArgumentList();
 				}
 			}
 			else
 			{
-				addArgument(WordArgument.class, "Arguments");
+				addArgument(VanillaArgumentsArgument.class);
 				addArgumentList();
 			}
 			addFilter(new PermissionFilter(command.getPermission(), command.getPermissionMessage()));
@@ -207,8 +208,13 @@ public class PluginConsole extends Console
 			String[] arguments;
 			if (result.listNumber() == 1)
 			{
-				String string = (String) result.value()[0];
-				arguments = string.split(" ");
+				if (result.value().length > 0)
+				{
+					String string = (String) result.value()[0];
+					arguments = string.split(" ");
+				}
+				else
+					arguments = new String[0];
 			}
 			else
 				arguments = new String[0];
@@ -244,6 +250,42 @@ public class PluginConsole extends Console
 		{
 			executeCommand(event.getMessage(), PluginExecutor.convert(event.getPlayer()));
 			event.setCancelled(true);
+		}
+	}
+	
+	public static class VanillaArgumentsArgument extends PlainArgument<String>
+	{
+		boolean addBrackets = true;
+		
+		@Override
+		public void initArgument(Object[] data)
+		{
+			if (data.length == 1 && data[0] instanceof Boolean value)
+				addBrackets = value;
+		}
+		
+		@Override
+		public boolean addBrackets()
+		{
+			return addBrackets;
+		}
+		
+		@Override
+		public String defaultName()
+		{
+			return "Arguments";
+		}
+		
+		@Override
+		public List<String> argumentCompletions(Indexer<Character> source, Executor executor)
+		{
+			return null;
+		}
+		
+		@Override
+		public ReturnResult<String> interpretArgument(Indexer<Character> source, Executor executor)
+		{
+			return new ReturnResult<>(true, StringValue.consumeString(source));
 		}
 	}
 }

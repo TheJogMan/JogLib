@@ -56,12 +56,12 @@ public class LocationValue extends CompoundArgumentValue<Location, Location>
 			id = location.getWorld().getUID();
 		else
 			id = new UUID(0, 0);
-		builder.add((new UUIDValue(id)).asBytes());
-		builder.add((new DoubleValue(location.getX())).asBytes());
-		builder.add((new DoubleValue(location.getY())).asBytes());
-		builder.add((new DoubleValue(location.getZ())).asBytes());
-		builder.add((new FloatValue(location.getYaw())).asBytes());
-		builder.add((new FloatValue(location.getPitch())).asBytes());
+		builder.add(id);
+		builder.add(location.getX());
+		builder.add(location.getY());
+		builder.add(location.getZ());
+		builder.add(location.getPitch());
+		builder.add(location.getYaw());
 		return builder.toPrimitiveArray();
 	}
 	
@@ -181,49 +181,57 @@ public class LocationValue extends CompoundArgumentValue<Location, Location>
 		{
 			source.pushFilterState();
 			source.addFilter(new Indexer.ExclusionFilter<>(Data.formattingCharacters));
-			if (!StringValue.consumeSequence(source, "{World: "))
-				return new ReturnResult<>("Invalid format. Must begin with '{World: '");
+			if (!StringValue.consumeSequence(source, "{World:"))
+				return new ReturnResult<>("Invalid format. Must begin with '{World:'");
 			String worldName = StringValue.consumeString(source, ',');
 			if (source.next() != ',')
 				return new ReturnResult<>("Invalid format, expected ',' after world name.");
 			
-			if (!StringValue.consumeSequence(source, "X: "))
-				return new ReturnResult<>("Invalid format. X coordinate must begin with 'X: '");
+			if (!StringValue.consumeSequence(source, "X:"))
+				return new ReturnResult<>("Invalid format. X coordinate must begin with 'X:'");
 			Consumer.ConsumptionResult<Value<?, Double>, Character> xCoordinate = DoubleValue.getCharacterConsumer().consume(source);
 			if (!xCoordinate.success())
 				return new ReturnResult<>(RichStringBuilder.start().append("Could not parse X Coordinate: ").append(xCoordinate.description()).build());
 			if (source.next() != ',')
 				return new ReturnResult<>("Invalid format, expected ',' after x coordinate.");
 			
-			if (!StringValue.consumeSequence(source, "Y: "))
-				return new ReturnResult<>("Invalid format. Y coordinate must begin with 'Y: '");
+			if (!StringValue.consumeSequence(source, "Y:"))
+				return new ReturnResult<>("Invalid format. Y coordinate must begin with 'Y:'");
 			Consumer.ConsumptionResult<Value<?, Double>, Character> yCoordinate = DoubleValue.getCharacterConsumer().consume(source);
 			if (!yCoordinate.success())
 				return new ReturnResult<>(RichStringBuilder.start().append("Could not parse Y Coordinate: ").append(yCoordinate.description()).build());
 			if (source.next() != ',')
 				return new ReturnResult<>("Invalid format, expected ',' after y coordinate.");
 			
-			if (!StringValue.consumeSequence(source, "Z: "))
-				return new ReturnResult<>("Invalid format. Z coordinate must begin with 'Z: '");
+			if (!StringValue.consumeSequence(source, "Z:"))
+				return new ReturnResult<>("Invalid format. Z coordinate must begin with 'Z:'");
 			Consumer.ConsumptionResult<Value<?, Double>, Character> zCoordinate = DoubleValue.getCharacterConsumer().consume(source);
 			if (!zCoordinate.success())
 				return new ReturnResult<>(RichStringBuilder.start().append("Could not parse Z Coordinate: ").append(zCoordinate.description()).build());
 			if (source.next() != ',')
 				return new ReturnResult<>("Invalid format, expected ',' after z coordinate.");
 			
-			if (!StringValue.consumeSequence(source, "Pitch: "))
-				return new ReturnResult<>("Invalid format. Pitch must begin with 'Pitch: '");
+			if (!StringValue.consumeSequence(source, "Pitch:"))
+				return new ReturnResult<>("Invalid format. Pitch must begin with 'Pitch:'");
 			Consumer.ConsumptionResult<Value<?, Float>, Character> pitch = FloatValue.getCharacterConsumer().consume(source);
 			if (!pitch.success())
 				return new ReturnResult<>(RichStringBuilder.start().append("Could not parse Pitch: ").append(pitch.description()).build());
 			if (source.next() != ',')
 				return new ReturnResult<>("Invalid format, expected ',' after Pitch.");
 			
-			if (!StringValue.consumeSequence(source, "Yaw: "))
-				return new ReturnResult<>("Invalid format. Yaw must begin with 'Yaw: '");
+			if (!StringValue.consumeSequence(source, "Yaw:"))
+				return new ReturnResult<>("Invalid format. Yaw must begin with 'Yaw:'");
 			Consumer.ConsumptionResult<Value<?, Float>, Character> yaw = FloatValue.getCharacterConsumer().consume(source);
 			if (!yaw.success())
 				return new ReturnResult<>(RichStringBuilder.start().append("Could not parse Yaw: ").append(yaw.description()).build());
+			
+			/*
+			we want to make sure we aren't consuming any white space after our closing bracket,
+			so we remove the filter before checking for it, and we will manually skip past any remaining
+			formatting characters
+			 */
+			source.popFilterState();
+			source.skip(Data.formattingCharacters);
 			if (source.next() != '}')
 				return new ReturnResult<>("Invalid format, expected '}' after Yaw.");
 			
