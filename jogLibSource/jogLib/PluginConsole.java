@@ -22,9 +22,9 @@ import java.util.*;
 
 public class PluginConsole extends Console
 {
-	PluginConsole(String name, String description)
+	PluginConsole()
 	{
-		super(name, '/', description);
+		super("PluginConsole", '/', "Commands.");
 		
 		addContextFiller(new VanillaCommandFiller(this));
 	}
@@ -71,7 +71,7 @@ public class PluginConsole extends Console
 	
 	private static class ComponentHolder extends org.bukkit.command.Command
 	{
-		CommandComponent component;
+		final CommandComponent component;
 		
 		protected ComponentHolder(CommandComponent component)
 		{
@@ -104,38 +104,32 @@ public class PluginConsole extends Console
 		}
 	}
 	
-	private static class VanillaCommandFiller implements ContextFiller
-	{
-		PluginConsole console;
-		
-		public VanillaCommandFiller(PluginConsole console)
+	private record VanillaCommandFiller(PluginConsole console) implements ContextFiller
 		{
-			this.console = console;
-		}
-		
-		@Override
-		public Collection<CommandComponent> getComponents(Executor executor)
-		{
-			SimpleCommandMap commandMap = getCommandMap();
-			if (commandMap == null)
-				return null;
 			
-			ArrayList<CommandComponent> components = new ArrayList<>();
-			HashMap<Plugin, Category> plugins = new HashMap<>();
-			for (org.bukkit.command.Command command : commandMap.getCommands())
+			@Override
+			public Collection<CommandComponent> getComponents(Executor executor)
 			{
-				if (command instanceof ComponentHolder && console.equals(((ComponentHolder)command).component.parent()))
-					continue;
+				SimpleCommandMap commandMap = getCommandMap();
+				if (commandMap == null)
+					return null;
 				
-				components.add(new VanillaCommand(command));
+				ArrayList<CommandComponent> components = new ArrayList<>();
+				HashMap<Plugin, Category> plugins = new HashMap<>();
+				for (org.bukkit.command.Command command : commandMap.getCommands())
+				{
+					if (command instanceof ComponentHolder && console.equals(((ComponentHolder) command).component.parent()))
+						continue;
+					
+					components.add(new VanillaCommand(command));
+				}
+				return components;
 			}
-			return components;
 		}
-	}
 	
 	private static class VanillaCommand extends Command
 	{
-		org.bukkit.command.Command command;
+		final org.bukkit.command.Command command;
 		
 		public VanillaCommand(org.bukkit.command.Command command)
 		{
@@ -238,13 +232,6 @@ public class PluginConsole extends Console
 	
 	static class CommandEventListener implements Listener
 	{
-		PluginConsole console;
-		
-		CommandEventListener(PluginConsole console)
-		{
-			this.console = console;
-		}
-		
 		@EventHandler(priority = EventPriority.MONITOR)
 		public void onServerCommand(ServerCommandEvent event)
 		{

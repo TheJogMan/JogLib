@@ -14,9 +14,9 @@ import java.util.*;
 public class ContentManager
 {
 	static HashMap<NamespacedKey, CustomObjectType<?>> customObjectTypes;
-	static CustomDataType customDataType = new CustomDataType();
-	static NamespacedKey customDataKey = new NamespacedKey(JogLib.jogLib(), "CustomData");
-	static NamespacedKey invalidKey = new NamespacedKey(JogLib.jogLib(), "Invalid");
+	static final CustomDataType customDataType = new CustomDataType();
+	static final NamespacedKey customDataKey = new NamespacedKey(JogLib.jogLib(), "CustomData");
+	static final NamespacedKey invalidKey = new NamespacedKey(JogLib.jogLib(), "Invalid");
 	
 	public static void init(Plugin plugin)
 	{

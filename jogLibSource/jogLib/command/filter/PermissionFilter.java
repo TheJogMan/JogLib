@@ -7,8 +7,8 @@ import org.bukkit.permissions.*;
 
 public class PermissionFilter extends PluginExecutorFilter
 {
-	String permission;
-	String deniedMessage;
+	final String permission;
+	final String deniedMessage;
 	
 	public PermissionFilter(String permission, String deniedMessage)
 	{

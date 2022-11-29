@@ -156,7 +156,7 @@ public class LocationValue extends CompoundArgumentValue<Location, Location>
 			return new Location(((PhysicalExecutor)executor).getLocation().getWorld(), (Double)result.value()[0], (Double)result.value()[1], (Double)result.value()[2]);
 	}
 	
-	private static class InternalLocationArgument extends PlainArgument<Location>
+	public static class InternalLocationArgument extends PlainArgument<Location>
 	{
 		@Override
 		public void initArgument(Object[] data)

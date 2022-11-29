@@ -195,10 +195,10 @@ public class HeadlessSender implements CommandSender, Iterable<PermissionAttachm
 	
 	public static class PermissionIterator implements Iterator<PermissionAttachmentInfo>
 	{
-		Iterator<PermissionAttachment> attachmentIterator;
+		final Iterator<PermissionAttachment> attachmentIterator;
 		Iterator<Map.Entry<String, Boolean>> permissionIterator;
 		PermissionAttachment attachment;
-		HeadlessSender sender;
+		final HeadlessSender sender;
 		
 		public PermissionIterator(HeadlessSender sender)
 		{

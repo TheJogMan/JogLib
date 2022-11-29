@@ -33,8 +33,8 @@ public class EntityFilter implements ExecutorFilter.Filter
 		this.type = filter;
 	}
 	
-	EntityType[] types;
-	FilterType type;
+	final EntityType[] types;
+	final FilterType type;
 	
 	@Override
 	public Result canExecute(Executor executor)

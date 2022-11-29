@@ -20,8 +20,8 @@ import java.util.*;
 
 public abstract class CustomItemType<ObjectType extends CustomItemType.CustomItem> extends CustomObjectType<ItemMeta>
 {
-	Material material;
-	String name;
+	final Material material;
+	final String name;
 	
 	public CustomItemType(NamespacedKey key, Material material, String name)
 	{

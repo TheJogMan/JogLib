@@ -9,7 +9,7 @@ import org.bukkit.plugin.java.*;
 
 public class JogLib extends JavaPlugin
 {
-	public static PluginConsole commandConsole = new PluginConsole("PluginConsole", "Commands.");
+	public static final PluginConsole commandConsole = new PluginConsole();
 	static JogLib jogLib;
 	
 	public JogLib()
@@ -27,7 +27,7 @@ public class JogLib extends JavaPlugin
 	{
 		registerValues();
 		
-		Bukkit.getPluginManager().registerEvents(new PluginConsole.CommandEventListener(commandConsole), this);
+		Bukkit.getPluginManager().registerEvents(new PluginConsole.CommandEventListener(), this);
 		
 		ContentManager.init(this);
 	}
