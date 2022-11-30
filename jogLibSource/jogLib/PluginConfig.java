@@ -19,25 +19,25 @@ public class PluginConfig extends Config
 	}
 	
 	@Override
-	public <Type> Setting<Type> createSetting(String name, TypeRegistry.RegisteredType type, Type defaultValue, String description)
+	public <Type> Setting<Type> createSetting(String name, TypeRegistry.RegisteredType type, Value<Type, Type> defaultValue, String description)
 	{
 		return createSetting(name, type, defaultValue, new RichString(description), new Object[0]);
 	}
 	
 	@Override
-	public <Type> Setting<Type> createSetting(String name, TypeRegistry.RegisteredType type, Type defaultValue, String description, Object[] argumentData)
+	public <Type> Setting<Type> createSetting(String name, TypeRegistry.RegisteredType type, Value<Type, Type> defaultValue, String description, Object[] argumentData)
 	{
 		return createSetting(name, type, defaultValue, new RichString(description));
 	}
 	
 	@Override
-	public <Type> Setting<Type> createSetting(String name, TypeRegistry.RegisteredType type, Type defaultValue, RichString description)
+	public <Type> Setting<Type> createSetting(String name, TypeRegistry.RegisteredType type, Value<Type, Type> defaultValue, RichString description)
 	{
 		return createSetting(name, type, defaultValue, description, new Object[0]);
 	}
 	
 	@Override
-	public <Type> Setting<Type> createSetting(String name, TypeRegistry.RegisteredType type, Type defaultValue, RichString description, Object[] argumentData)
+	public <Type> Setting<Type> createSetting(String name, TypeRegistry.RegisteredType type, Value<Type, Type> defaultValue, RichString description, Object[] argumentData)
 	{
 		Setting<Type> setting = super.createSetting(name, type, defaultValue, description, argumentData);
 		setting.addCommands(configCategory);
