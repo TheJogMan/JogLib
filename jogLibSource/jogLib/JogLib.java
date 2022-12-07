@@ -38,7 +38,9 @@ public class JogLib extends JavaPlugin
 				{"NamespacedKey", NamespacedKeyValue.class},
 				{"Location", LocationValue.class},
 				{"Material", MaterialValue.class},
-				{"BlockData", BlockDataValue.class}
+				{"BlockData", BlockDataValue.class},
+				{"Vector", VectorValue.class},
+				{"FluidCollisionMode", FluidCollisionModeValue.class}
 		};
 		
 		Result[] registrationResults = new Result[typeClasses.length];
