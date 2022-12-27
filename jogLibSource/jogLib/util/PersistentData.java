@@ -20,13 +20,13 @@ public class PersistentData
 		return value;
 	}
 	
-	private record ValueDataType(TypeRegistry.RegisteredType type) implements PersistentDataType<byte[], Value<?, ?>>
+	private record ValueDataType(TypeRegistry.RegisteredType<?, ?> type) implements PersistentDataType<byte[], Value<?, ?>>
 		{
 			
 			@Override
 			public Value<?, ?> fromPrimitive(byte[] arg0, PersistentDataAdapterContext arg1)
 			{
-				Consumer.ConsumptionResult<Value<?, ?>, Byte> result = type.byteConsumer().consume(ByteArrayBuilder.indexer(arg0));
+				Consumer.ConsumptionResult<? extends Value<?, ?>, Byte> result = type.byteConsumer().consume(ByteArrayBuilder.indexer(arg0));
 				if (result.success())
 					return result.value();
 				else

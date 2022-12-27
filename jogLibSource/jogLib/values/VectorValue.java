@@ -36,7 +36,7 @@ public class VectorValue extends Value<Vector, Vector>
 	
 	public static String toString(Vector vector)
 	{
-		return "{X:" + vector.getX() + ",Y:" + vector.getY() + ",Z:" + vector.getZ() + "}";
+		return "{X: " + vector.getX() + ", Y: " + vector.getY() + ", Z: " + vector.getZ() + "}";
 	}
 	
 	public static RichString toRichString(Vector vector)
@@ -154,8 +154,8 @@ public class VectorValue extends Value<Vector, Vector>
 				return new Consumer.ConsumptionResult<>(source, RichStringBuilder.start("Could not parse Z: ").append(zResult.description()).build());
 			
 			source.popFilterState();
-			source.skip(' ');
-			if (source.atEnd() || source.get() != '}')
+			source.skip(new Character[]{' '});
+			if (source.atEnd() || source.next() != '}')
 				return new Consumer.ConsumptionResult<>(source, "Must end with '}'");
 			
 			return new Consumer.ConsumptionResult<>(new VectorValue(new Vector((double)xResult.value().get(), (double)yResult.value().get(), (double)zResult.value().get())), source);

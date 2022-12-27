@@ -32,7 +32,7 @@ public class MaterialValue extends Value<Material, Material>
 	@Override
 	public String asString()
 	{
-		return StringValue.pack(convertOut(get().toString()));
+		return convertOut(get().toString());
 	}
 	
 	@Override
@@ -104,23 +104,22 @@ public class MaterialValue extends Value<Material, Material>
 	}
 	
 	@TypeRegistry.CharacterConsumer
-	public static Consumer<Value<?, Material>, Character> getCharacterConsumer()
+	public static Consumer<Value<?, Material>, Character> getCharacterConsumer(Object[] data)
 	{
-		return (source) ->
+		boolean mustBeBlock = data.length == 1 ? (Boolean)data[0] : true;
+		return (source ->
 		{
-			Consumer.ConsumptionResult<Value<?, String>, Character> result = StringValue.getCharacterConsumer().consume(source);
-			if (!result.success())
-				return new Consumer.ConsumptionResult<>(source, result.description());
-			try
+			int index = source.position();
+			for (Material material : Material.values())
 			{
-				Material material = Material.valueOf(convertIn((String)result.value().get()));
-				return new Consumer.ConsumptionResult<>(new MaterialValue(material), source);
+				if (mustBeBlock && !material.isBlock())
+					continue;
+				
+				if (StringValue.consumeSequence(source, convertOut(material.toString()), false))
+					return new Consumer.ConsumptionResult<>(new MaterialValue(material), source);
 			}
-			catch (Exception e)
-			{
-				return new Consumer.ConsumptionResult<>(source, "Not a valid Material.");
-			}
-		};
+			return new Consumer.ConsumptionResult<>(source, "Not a valid Material.");
+		});
 	}
 	
 	@TypeRegistry.ValidationValues
