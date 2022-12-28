@@ -76,7 +76,7 @@ public class NamespacedKeyValue extends Value<NamespacedKey, NamespacedKey>
 	}
 	
 	@Override
-	public List<String> argumentCompletions(Indexer<Character> source, Executor executor)
+	public List<String> argumentCompletions(Indexer<Character> source, Executor executor, Object[] data)
 	{
 		return null;
 	}

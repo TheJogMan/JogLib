@@ -34,7 +34,7 @@ public class CoordinateArgument extends PlainArgument<Double>
 	}
 	
 	@Override
-	public List<String> argumentCompletions(Indexer<Character> source, Executor executor)
+	public List<String> argumentCompletions(Indexer<Character> source, Executor executor, Object[] data)
 	{
 		ArrayList<String> completions = new ArrayList<>();
 		if (source.atEnd())
@@ -49,7 +49,7 @@ public class CoordinateArgument extends PlainArgument<Double>
 	}
 	
 	@Override
-	public ReturnResult<Double> interpretArgument(Indexer<Character> source, Executor executor)
+	public ReturnResult<Double> interpretArgument(Indexer<Character> source, Executor executor, Object[] data)
 	{
 		if (source.atEnd())
 			return new ReturnResult<>("Argument is empty");

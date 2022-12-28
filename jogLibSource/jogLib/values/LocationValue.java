@@ -171,13 +171,13 @@ public class LocationValue extends CompoundArgumentValue<Location, Location>
 		}
 		
 		@Override
-		public List<String> argumentCompletions(Indexer<Character> source, Executor executor)
+		public List<String> argumentCompletions(Indexer<Character> source, Executor executor, Object[] data)
 		{
 			return null;
 		}
 		
 		@Override
-		public ReturnResult<Location> interpretArgument(Indexer<Character> source, Executor executor)
+		public ReturnResult<Location> interpretArgument(Indexer<Character> source, Executor executor, Object[] data)
 		{
 			source.pushFilterState();
 			source.addFilter(new Indexer.ExclusionFilter<>(Data.formattingCharacters));

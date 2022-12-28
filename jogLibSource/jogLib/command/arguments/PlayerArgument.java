@@ -26,7 +26,7 @@ public class PlayerArgument extends PlainArgument<Player>
 	}
 	
 	@Override
-	public List<String> argumentCompletions(Indexer<Character> source, Executor executor)
+	public List<String> argumentCompletions(Indexer<Character> source, Executor executor, Object[] data)
 	{
 		String token = StringValue.consumeString(source, ' ').toLowerCase();
 		ArrayList<String> completions = new ArrayList<>();
@@ -39,7 +39,7 @@ public class PlayerArgument extends PlainArgument<Player>
 	}
 	
 	@Override
-	public ReturnResult<Player> interpretArgument(Indexer<Character> source, Executor executor)
+	public ReturnResult<Player> interpretArgument(Indexer<Character> source, Executor executor, Object[] data)
 	{
 		String name = StringValue.consumeString(source, ' ');
 		for (Player player : Bukkit.getOnlinePlayers())

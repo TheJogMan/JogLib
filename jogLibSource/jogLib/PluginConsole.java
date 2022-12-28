@@ -277,13 +277,13 @@ public class PluginConsole extends Console
 		}
 		
 		@Override
-		public List<String> argumentCompletions(Indexer<Character> source, Executor executor)
+		public List<String> argumentCompletions(Indexer<Character> source, Executor executor, Object[] data)
 		{
 			return null;
 		}
 		
 		@Override
-		public ReturnResult<String> interpretArgument(Indexer<Character> source, Executor executor)
+		public ReturnResult<String> interpretArgument(Indexer<Character> source, Executor executor, Object[] data)
 		{
 			return new ReturnResult<>(true, StringValue.consumeString(source));
 		}

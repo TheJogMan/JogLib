@@ -79,7 +79,7 @@ public class BlockDataValue extends Value<BlockData, BlockData>
 	}
 	
 	@Override
-	public List<String> argumentCompletions(Indexer<Character> source, Executor executor)
+	public List<String> argumentCompletions(Indexer<Character> source, Executor executor, Object[] data)
 	{
 		return null;
 	}

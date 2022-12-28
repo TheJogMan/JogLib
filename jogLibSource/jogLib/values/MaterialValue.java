@@ -11,7 +11,7 @@ import java.util.*;
 
 public class MaterialValue extends Value<Material, Material>
 {
-	boolean mustBeBlock = false;
+	InterpretationConfig config = new InterpretationConfig();
 	
 	public MaterialValue()
 	{
@@ -32,7 +32,7 @@ public class MaterialValue extends Value<Material, Material>
 	@Override
 	public String asString()
 	{
-		return convertOut(get().toString());
+		return config.boundingFormat.pack(convertOut(get().toString()));
 	}
 	
 	@Override
@@ -56,8 +56,7 @@ public class MaterialValue extends Value<Material, Material>
 	@Override
 	public void initArgument(Object[] data)
 	{
-		if (data.length == 1)
-			mustBeBlock = (Boolean)data[0];
+		config = new InterpretationConfig(data);
 	}
 	
 	@Override
@@ -67,18 +66,23 @@ public class MaterialValue extends Value<Material, Material>
 	}
 	
 	@Override
-	public List<String> argumentCompletions(Indexer<Character> source, Executor executor)
+	public List<String> argumentCompletions(Indexer<Character> source, Executor executor, Object[] data)
 	{
-		return validOptions(mustBeBlock);
+		return validOptions(config);
 	}
 	
-	private static List<String> validOptions(boolean mustBeBlock)
+	private static List<String> validOptions(InterpretationConfig config)
 	{
 		ArrayList<String> options = new ArrayList<>();
 		for (Material material : Material.values())
 		{
-			if (!mustBeBlock || material.isBlock())
-				options.add(convertOut(material.toString()));
+			if (!config.mustBeBlock || material.isBlock())
+			{
+				String materialName = convertOut(material.toString());
+				if (!config.boundingFormat.equals(BoundingFormat.SPACE_TERMINATED))
+					materialName = config.boundingFormat.pack(materialName);
+				options.add(materialName);
+			}
 		}
 		return options;
 	}
@@ -106,20 +110,124 @@ public class MaterialValue extends Value<Material, Material>
 	@TypeRegistry.CharacterConsumer
 	public static Consumer<Value<?, Material>, Character> getCharacterConsumer(Object[] data)
 	{
-		boolean mustBeBlock = data.length == 1 ? (Boolean)data[0] : true;
+		InterpretationConfig config = new InterpretationConfig(data);
 		return (source ->
 		{
-			int index = source.position();
-			for (Material material : Material.values())
+			Consumer.ConsumptionResult<String, Character> result = config.boundingFormat.consume(source);
+			if (!result.success())
+				return new Consumer.ConsumptionResult<>(source, result.description());
+			String materialName = convertIn(config.boundingFormat.unpack(result.value()));
+			Material material;
+			try
 			{
-				if (mustBeBlock && !material.isBlock())
-					continue;
-				
-				if (StringValue.consumeSequence(source, convertOut(material.toString()), false))
-					return new Consumer.ConsumptionResult<>(new MaterialValue(material), source);
+				material = Material.valueOf(materialName);
 			}
-			return new Consumer.ConsumptionResult<>(source, "Not a valid Material.");
+			catch (Exception e)
+			{
+				return new Consumer.ConsumptionResult<>(source, "Not a valid Material.");
+			}
+			
+			if (config.mustBeBlock && !material.isBlock())
+				return new Consumer.ConsumptionResult<>(source, "Must be a block.");
+			
+			return new Consumer.ConsumptionResult<>(new MaterialValue(material), source);
 		});
+	}
+	
+	private static class InterpretationConfig
+	{
+		boolean mustBeBlock = false;
+		BoundingFormat boundingFormat = BoundingFormat.QUOTES;
+		
+		InterpretationConfig()
+		{
+		
+		}
+		
+		InterpretationConfig(Object[] data)
+		{
+			load(data);
+		}
+		
+		void load(Object[] data)
+		{
+			if (data.length > 0 && data[0] instanceof Boolean mustBeBlock)
+				this.mustBeBlock = mustBeBlock;
+			if (data.length > 1 && data[1] instanceof BoundingFormat boundingFormat)
+				this.boundingFormat = boundingFormat;
+		}
+	}
+		
+	public enum BoundingFormat
+	{
+		QUOTES(
+		input ->
+		{
+			return StringValue.pack(input);
+		},
+		input ->
+		{
+			return StringValue.unpack(input);
+		},
+		source ->
+		{
+			if (source.atEnd() || source.next() != '"')
+				return new Consumer.ConsumptionResult<>(source, "Must begin with '\"'");
+			String result = StringValue.consumeString(source, '"');
+			if (source.atEnd() || source.next() != '"')
+				return new Consumer.ConsumptionResult<>(source, "Must end with '\"'");
+			return new Consumer.ConsumptionResult<>('"' + result + '"', source);
+		}),
+		SPACE_TERMINATED(
+		input ->
+		{
+			return input + ' ';
+		},
+		input ->
+		{
+			return input.substring(0, input.length() - 1);
+		},
+		source ->
+		{
+			return new Consumer.ConsumptionResult<>(StringValue.consumeString(source, ' ') + ' ', source);
+		});
+		
+		final Converter packer;
+		final Converter unpacker;
+		final Consumer<String, Character> consumer;
+		
+		BoundingFormat(Converter packer, Converter unpacker, Consumer<String, Character> consumer)
+		{
+			this.packer = packer;
+			this.unpacker = unpacker;
+			this.consumer = consumer;
+		}
+		
+		String pack(String input)
+		{
+			if (input == null)
+				return null;
+			
+			return packer.convert(input);
+		}
+		
+		String unpack(String input)
+		{
+			if (input == null)
+				return null;
+			
+			return unpacker.convert(input);
+		}
+		
+		Consumer.ConsumptionResult<String, Character> consume(Indexer<Character> source)
+		{
+			return consumer.consume(source);
+		}
+		
+		interface Converter
+		{
+			String convert(String input);
+		}
 	}
 	
 	@TypeRegistry.ValidationValues
@@ -133,6 +241,9 @@ public class MaterialValue extends Value<Material, Material>
 	
 	public static String convertOut(String name)
 	{
+		if (name == null)
+			return null;
+		
 		StringBuilder newName = new StringBuilder();
 		boolean capitalize = false;
 		for (int index = 0; index < name.length(); index++)
@@ -151,6 +262,9 @@ public class MaterialValue extends Value<Material, Material>
 	
 	public static String convertIn(String name)
 	{
+		if (name == null)
+			return null;
+		
 		StringBuilder newName = new StringBuilder();
 		for (int index = 0; index < name.length(); index++)
 		{
