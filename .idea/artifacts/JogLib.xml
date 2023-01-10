@@ -1,0 +1,9 @@
+<component name="ArtifactManager">
+  <artifact type="jar" build-on-make="true" name="JogLib">
+    <output-path>$PROJECT_DIR$/out/artifacts/JogLib</output-path>
+    <root id="archive" name="JogLib.jar">
+      <element id="library" level="project" name="JogUtil" />
+      <element id="module-output" name="JogLib" />
+    </root>
+  </artifact>
+</component>
